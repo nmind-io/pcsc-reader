@@ -110,7 +110,6 @@
     </Compile>
     <Compile Include="lib\nmind-nfc\IReaderMonitor.cs" />
     <Compile Include="lib\nmind-utils\Helper.cs" />
-    <Compile Include="lib\nmind-nfc\IDevicesMonitor.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -1,4 +1,5 @@
 ﻿using PCSC;
+using PCSC.Exceptions;
 using PCSC.Monitoring;
 using System;
 using System.Collections.Generic;
@@ -25,13 +26,7 @@ namespace Nmind.pcsc {
         /// <summary>
         /// 
         /// </summary>
-        protected List<IDevicesMonitor> devicesMonitors;
-
-        /// <summary>
-        /// 
-        /// </summary>
         public NFCService() {
-            devicesMonitors = new List<IDevicesMonitor>();
             EnableDevicesMonitor();
         }
 
@@ -46,46 +41,50 @@ namespace Nmind.pcsc {
         /// <summary>
         /// 
         /// </summary>
-        protected void EnableDevicesMonitor() {
-            deviceMonitor = DeviceMonitorFactory.Instance.Create(SCardScope.System);
-            deviceMonitor.Initialized += OnDevicesInitialized;
-            deviceMonitor.StatusChanged += OnDevicesStatusChanged;
-            deviceMonitor.MonitorException += OnDevicesMonitorException;
-            deviceMonitor.Start();
-        }
+        /// <returns></returns>
+        public IEnumerable<string> ListReaders() {
+            try {
+                using (var context = ContextFactory.Instance.Establish(SCardScope.System)) {
+                    return context.GetReaders();
+                }
+            } catch (Exception) {
 
-        /// <summary>
-        /// 
-        /// </summary>
-        protected void DisableDevicesMonitor() {
-            if (deviceMonitor != null) {
-                deviceMonitor.Initialized -= OnDevicesInitialized;
-                deviceMonitor.StatusChanged -= OnDevicesStatusChanged;
-                deviceMonitor.MonitorException -= OnDevicesMonitorException;
-
-                deviceMonitor.Dispose();
+                return new List<string>();
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="monitor"></param>
-        public void AddDevicesMonitor(IDevicesMonitor monitor) {
-            if (!devicesMonitors.Contains(monitor)){
-                devicesMonitors.Add(monitor);
-            }
+        /// <returns></returns>
+        public bool HasReaders() {
+            return !Helper.IsEmpty(ListReaders());
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="monitor"></param>
-        public void RemoveDevicesMonitor(IDevicesMonitor monitor) {
-            if (devicesMonitors.Contains(monitor)) {
-                devicesMonitors.Remove(monitor);
-            }
-        }
+
+        #region CardMonitor Delegate and Event
+
+        /*
+        public delegate void CardInsertedEventHandler(CardStatusEventArgs args);
+
+        public delegate void CardRemovedEventHandler(CardStatusEventArgs args);
+
+        public delegate void CardInitializedEventHandler(CardStatusEventArgs args);
+
+        public delegate void CardStatusChangedEventHandler(StatusChangeEventArgs args);
+
+        public delegate void CardMonitorExceptionEventHandler(PCSCException ex);
+
+        public event CardInsertedEventHandler OnCardInserted;
+
+        public event CardRemovedEventHandler OnCardRemoved;
+
+        public event CardInitializedEventHandler OnInitialized;
+
+        public event CardStatusChangedEventHandler OnCardStatusChanged;
+
+        public event CardMonitorExceptionEventHandler OnCardMonitorException;
+        */
 
         /// <summary>
         /// 
@@ -114,39 +113,58 @@ namespace Nmind.pcsc {
         /// 
         /// </summary>
         public void StopReaderMonitor() {
-            if(readerMonitor != null) {
+            if (readerMonitor != null) {
                 readerMonitor.Cancel();
                 readerMonitor.Dispose();
                 readerMonitor = null;
             }
         }
 
+        #endregion
+
+
+
+        #region DevicesMonitor Delegate and Event
+
+        public delegate void MonitorExceptionReadersEventHandler(Exception e);
+
+        public delegate void DetachedReadersEventHandler(IEnumerable<string> readersName);
+
+        public delegate void AttachedReadersEventHandler(IEnumerable<string> readersName);
+
+        public delegate void InitializedReadersEventHandler(IEnumerable<string> readersName);
+
+        public event MonitorExceptionReadersEventHandler OnReadersMonitorException;
+
+        public event DetachedReadersEventHandler OnReadersDetached;
+
+        public event AttachedReadersEventHandler OnReadersAttached;
+
+        public event InitializedReadersEventHandler OnReadersInitialized;
+
         /// <summary>
         /// 
         /// </summary>
-        /// <returns></returns>
-        public IEnumerable<string> ListReaders() {
-            try {
-                using (var context = ContextFactory.Instance.Establish(SCardScope.System)) {
-                    return context.GetReaders();
-                }
-            } catch (Exception) {
+        protected void EnableDevicesMonitor() {
+            deviceMonitor = DeviceMonitorFactory.Instance.Create(SCardScope.System);
+            deviceMonitor.Initialized += OnDevicesInitialized;
+            deviceMonitor.StatusChanged += OnDevicesStatusChanged;
+            deviceMonitor.MonitorException += OnDevicesMonitorException;
+            deviceMonitor.Start();
+        }
 
-                return new List<string>();
+        /// <summary>
+        /// 
+        /// </summary>
+        protected void DisableDevicesMonitor() {
+            if (deviceMonitor != null) {
+                deviceMonitor.Initialized -= OnDevicesInitialized;
+                deviceMonitor.StatusChanged -= OnDevicesStatusChanged;
+                deviceMonitor.MonitorException -= OnDevicesMonitorException;
+
+                deviceMonitor.Dispose();
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public bool HasReaders() {
-            return !Helper.IsEmpty(ListReaders());
-        }
-
-
-
-        #region DevicesMonitor events
 
         /// <summary>
         /// 
@@ -154,13 +172,7 @@ namespace Nmind.pcsc {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void OnDevicesMonitorException(object sender, DeviceMonitorExceptionEventArgs args) {
-            foreach(var m in devicesMonitors) {
-                try {
-                    m.OnMonitorException(args.Exception);
-                } catch (Exception) {
-                }
-                
-            }
+            OnReadersMonitorException?.Invoke(args.Exception);
         }
 
         /// <summary>
@@ -173,48 +185,12 @@ namespace Nmind.pcsc {
             StopReaderMonitor();
             DisableDevicesMonitor();
 
-            foreach (var readerName in ev.DetachedReaders) {
-                foreach (var m in devicesMonitors) {
-
-                    try {
-                        m.OnDetachedReader(readerName);
-                    } catch (Exception e) {
-                    }
-
-                }
-            }
-
             if(ev.DetachedReaders != null && ev.DetachedReaders.Count() > 0) {
-                foreach (var m in devicesMonitors) {
-
-                    try {
-                        m.OnDetachedReaders(ev.DetachedReaders);
-                    } catch (Exception e) {
-                    }
-
-                }
-            }
-
-            foreach (var readerName in ev.AttachedReaders) {
-                foreach (var m in devicesMonitors) {
-
-                    try {
-                        m.OnAttachedReader(readerName);
-                    } catch (Exception e) {
-                    }
-
-                }
+                OnReadersDetached?.Invoke(ev.DetachedReaders);
             }
 
             if (ev.AttachedReaders != null && ev.AttachedReaders.Count() > 0) {
-                foreach (var m in devicesMonitors) {
-
-                    try {
-                        m.OnAttachedReaders(ev.AttachedReaders);
-                    } catch (Exception e) {
-                    }
-
-                }
+                OnReadersAttached?.Invoke(ev.AttachedReaders);
             }
 
             EnableDevicesMonitor();
@@ -228,26 +204,8 @@ namespace Nmind.pcsc {
         /// <param name="ev"></param>
         private void OnDevicesInitialized(object sender, DeviceChangeEventArgs ev) {
 
-            foreach (var readerName in ev.AllReaders) {
-                foreach (var m in devicesMonitors) {
-
-                    try {
-                        m.OnInitialized(readerName);
-                    } catch (Exception e) {
-                    }
-
-                }
-            }
-
             if (ev.AttachedReaders != null && ev.AllReaders.Count() > 0) {
-                foreach (var m in devicesMonitors) {
-
-                    try {
-                        m.OnInitialized(ev.AllReaders);
-                    } catch (Exception e) {
-                    }
-
-                }
+                OnReadersInitialized?.Invoke(ev.AllReaders);
             }
 
         }

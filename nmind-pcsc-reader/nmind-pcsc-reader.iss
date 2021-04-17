@@ -5,7 +5,7 @@
 ; @licence MIT License
 ;
 #define MyAppName "PCSC Reader"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Numeric Mind"
 #define MyAppURL "http://nmind.io/"
 #define MyAppExeName "nmind-pcsc-reader.exe"    

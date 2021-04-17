@@ -18,7 +18,7 @@ namespace Nmind.pcsc.reader {
     /// <summary>
     /// 
     /// </summary>
-    public partial class FrmMain : Form, IDevicesMonitor, IReaderMonitor {
+    public partial class FrmMain : Form, IReaderMonitor {
 
         /// <summary>
         /// 
@@ -255,7 +255,12 @@ namespace Nmind.pcsc.reader {
         /// 
         /// </summary>
         protected void InitializeService() {
-            service.AddDevicesMonitor(this);
+
+            service.OnReadersAttached += Service_OnReadersAttached;
+            service.OnReadersDetached += Service_OnReadersDetached;
+            service.OnReadersInitialized += Service_OnReadersInitialized;
+            service.OnReadersMonitorException += Service_OnReadersMonitorException;
+
             ReadConfiguration();
             UIHydrate();
             UIEnabled();
@@ -267,17 +272,14 @@ namespace Nmind.pcsc.reader {
         protected bool StartMonitoring() {
 
             if (cbReaders.Items.Count == 0) {
-
                 return false;
             }
 
             if (cbReaders.SelectedIndex < 0) {
-
                 return false;
             }
 
             if (cbReaders.SelectedIndex > cbReaders.Items.Count) {
-
                 return false;
             }
 
@@ -396,16 +398,12 @@ namespace Nmind.pcsc.reader {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="readerName"></param>
-        void IDevicesMonitor.OnAttachedReader(string readerName) {
-            WarnHistoryLn($"Attached: {readerName}");
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="readersName"></param>
-        void IDevicesMonitor.OnAttachedReaders(IEnumerable<string> readersName) {
+        private void Service_OnReadersAttached(IEnumerable<string> readersName) {
+
+            foreach(var name in readersName) {
+                WarnHistoryLn($"Attached: {name}");
+            }
 
             this.Invoke((MethodInvoker)delegate {
                 StopMonitoring();
@@ -419,16 +417,12 @@ namespace Nmind.pcsc.reader {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="readerName"></param>
-        void IDevicesMonitor.OnDetachedReader(string readerName) {
-            WarnHistoryLn($"Detached: {readerName}");
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="readersName"></param>
-        void IDevicesMonitor.OnDetachedReaders(IEnumerable<string> readersName) {
+        void Service_OnReadersDetached(IEnumerable<string> readersName) {
+
+            foreach (var name in readersName) {
+                WarnHistoryLn($"Detached: {name}");
+            }
 
             this.Invoke((MethodInvoker)delegate {
                 StopMonitoring();
@@ -442,16 +436,12 @@ namespace Nmind.pcsc.reader {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="readerName"></param>
-        void IDevicesMonitor.OnInitialized(string readerName) {
-            LogHistoryLn($"Connected: {readerName}");
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="readersName"></param>
-        void IDevicesMonitor.OnInitialized(IEnumerable<string> readersName) {
+        private void Service_OnReadersInitialized(IEnumerable<string> readersName) {
+
+            foreach (var name in readersName) {
+                WarnHistoryLn($"Connected: {name}");
+            }
 
         }
 
@@ -459,7 +449,7 @@ namespace Nmind.pcsc.reader {
         /// 
         /// </summary>
         /// <param name="e"></param>
-        void IDevicesMonitor.OnMonitorException(Exception e) {
+        void Service_OnReadersMonitorException(Exception e) {
             ErrorHistoryLn($"Exception: {e}");
         }
 
