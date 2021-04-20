@@ -18,6 +18,8 @@ namespace Nmind.pcsc.reader {
         /// </summary>
         [STAThread]
         static void Main() {
+
+            Helper.ResetWorkingDirectory();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 

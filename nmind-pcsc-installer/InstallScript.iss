@@ -5,11 +5,12 @@
 ; @licence MIT License
 ;
 #define MyAppName "PCSC Reader"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.3.0"
 #define MyAppPublisher "Numeric Mind"
 #define MyAppURL "http://nmind.io/"
 #define MyAppExeName "nmind-pcsc-reader.exe"    
 #define MyAppDirName "Nmind-Pcsc-reader"
+#define MyDevEnvPath "..\nmind-pcsc-reader"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -28,33 +29,36 @@ DisableDirPage=yes
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputBaseFilename={#MyAppDirName}_setup_{#MyAppVersion}
-OutputDir=.\release-installer
+OutputDir=.\Output
 Compression=lzma
 SolidCompression=yes
 ArchitecturesAllowed=x64
 Uninstallable=yes
 PrivilegesRequired=lowest
-SetupIconFile=RFID.ico
+SetupIconFile={#MyDevEnvPath}\RFID.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
+
 [Files]
-Source: "bin\Release\*.exe"; DestDir: "{app}"; Flags: ignoreversion    
-Source: "bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyDevEnvPath}\bin\Release\*.exe"; DestDir: "{app}"; Flags: ignoreversion    
+Source: "{#MyDevEnvPath}\bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; 
+Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Description: "Lancer l'application"; Flags: postinstall nowait
  
 [UninstallRun]
-Filename: "{app}\{#MyAppExeName}";
+
 
 [UninstallDelete]
 Type: files; Name: "{app}\*.ini"  
 Type: files; Name: "{app}\*.log"
-

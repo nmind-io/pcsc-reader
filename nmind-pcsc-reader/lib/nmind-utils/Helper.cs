@@ -35,6 +35,14 @@ static class Helper{
     /// <summary>
     /// 
     /// </summary>
+    /// <returns></returns>
+    static public void ResetWorkingDirectory() {
+        Directory.SetCurrentDirectory(AssemblyExecuteableDirectory());
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="values"></param>
     /// <param name="value"></param>
     /// <returns></returns>
