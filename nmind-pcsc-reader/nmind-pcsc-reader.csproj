@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>Nmind.pcsc.reader</RootNamespace>
     <AssemblyName>Nmind-pcsc-reader</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -38,6 +38,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -47,6 +48,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>Nmind.pcsc.reader.Program</StartupObject>
@@ -86,6 +88,14 @@
       <HintPath>..\packages\PCSC.Iso7816.5.0.0\lib\net40\PCSC.Iso7816.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
+    <Reference Include="SpringCard.LibCs, Version=19.8.7198.26873, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\springcard.pcsc.sdk.19.10\SpringCard.LibCs.dll</HintPath>
+    </Reference>
+    <Reference Include="SpringCard.PCSC, Version=19.6.7221.15266, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\springcard.pcsc.sdk.19.10\SpringCard.PCSC.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -98,29 +108,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="lib\nmind-nfc\AbstractSmartCard.cs" />
-    <Compile Include="lib\nmind-nfc\NFCCommand.cs" />
-    <Compile Include="lib\nmind-nfc\ISmartCard.cs" />
-    <Compile Include="lib\nmind-nfc\cards\MifareClassic.cs" />
-    <Compile Include="lib\nmind-nfc\cards\MifareUltralight.cs" />
+    <Compile Include="Lib\nmind-nfc\NFCCommand.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="lib\nmind-nfc\IReaderMonitor.cs" />
-    <Compile Include="lib\nmind-utils\Helper.cs" />
-    <Compile Include="Main.cs">
+    <Compile Include="Lib\nmind-nfc\IReaderMonitor.cs" />
+    <Compile Include="Lib\nmind-utils\Helper.cs" />
+    <Compile Include="Forms\Main.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Main.Designer.cs">
+    <Compile Include="Forms\Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
-    <Compile Include="lib\nmind-nfc\NFCReader.cs" />
-    <Compile Include="lib\nmind-nfc\NFCService.cs" />
+    <Compile Include="Lib\nmind-nfc\NFCReader.cs" />
+    <Compile Include="Lib\nmind-nfc\NFCService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Main.resx">
+    <EmbeddedResource Include="Forms\Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -129,7 +135,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="nmind-pcsc-reader_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
@@ -174,7 +179,6 @@
     <None Include="Resources\view_left_right.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="nmind-pcsc-reader.iss" />
     <Content Include="RFID.ico" />
   </ItemGroup>
   <ItemGroup />

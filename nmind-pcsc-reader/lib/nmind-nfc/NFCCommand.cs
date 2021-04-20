@@ -1,9 +1,4 @@
-﻿using PCSC;
-using PCSC.Iso7816;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using SpringCard.PCSC;
 
 /// <summary>
 /// 
@@ -25,12 +20,12 @@ namespace Nmind.pcsc {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="protocol"></param>
         /// <returns></returns>
-        public static CommandApdu ReadCardUid(SCardProtocol protocol) {
-            return new CommandApdu(IsoCase.Case2Short, protocol) {
+        public static CAPDU ReadCardUid() {
+
+            return new CAPDU() {
                 CLA = 0xFF,
-                Instruction = InstructionCode.GetData,
+                INS = 0xCA,
                 P1 = 0x00,
                 P2 = 0x00,
                 Le = 0x00

@@ -323,11 +323,14 @@ namespace Nmind.pcsc.reader {
         /// <param name="readerName"></param>
         /// <returns></returns>
         protected string ReadCardUid(string readerName) {
+            string uid = "";
+
             NFCReader reader = new NFCReader();
             reader.Connect(readerName);
-            string tag = BitConverter.ToString(reader.GetUID()).Replace("-", string.Empty);
+            uid = BitConverter.ToString(reader.GetUID()).Replace("-", string.Empty);
             reader.Disconnect();
-            return tag;
+
+            return uid;
         }
 
         /// <summary>
@@ -336,9 +339,13 @@ namespace Nmind.pcsc.reader {
         /// <param name="readerName"></param>
         /// <returns></returns>
         protected void SendCardUid(string readerName) {
-            string tag = ReadCardUid(readerName);
-            SimulateKeyboardInput(tag);
-            InfoHistoryLn($"Card: {tag}");
+            string uid = ReadCardUid(readerName);
+
+            if (uid.Length > 0) {
+                SimulateKeyboardInput(uid);
+                InfoHistoryLn($"Card: {uid}");
+            }
+
         }
 
         /// <summary>
